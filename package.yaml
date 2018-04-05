@@ -31,6 +31,7 @@ dependencies:
 - transformers
 - resourcet
 - unliftio-core
+- time
 
 library:
   source-dirs: src

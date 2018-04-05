@@ -21,6 +21,7 @@ import Control.Monad.Trans.Resource.Internal
 import Control.Monad.IO.Unlift
 import Data.Aeson (FromJSON, ToJSON)
 import GHC.Generics
+import Data.Time.Clock
 
 connStr :: ConnectionString
 connStr = "host=localhost dbname=budget user=budget password='' port=5432"
@@ -34,7 +35,8 @@ Transaction
     title String
     amount Double
     budgetId BudgetId
-    BudgetIdForTransaction budgetId
+    created UTCTime Maybe default=now()
+    updated UTCTime Maybe default=NULL
     deriving Show Generic
 |]
 

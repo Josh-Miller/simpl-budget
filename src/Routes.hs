@@ -22,6 +22,7 @@ import Control.Monad.Trans.Reader
 import Control.Monad.Logger
 import Control.Monad.Trans.Resource.Internal
 import Web.Scotty.Internal.Types
+import Data.Time.Clock (getCurrentTime, UTCTime)
 
 inHandlerDb :: Control.Monad.Trans.Reader.ReaderT
                          SQ.SqlBackend
@@ -31,6 +32,9 @@ inHandlerDb :: Control.Monad.Trans.Reader.ReaderT
                        -> ActionT
                             LT.Text IO a
 inHandlerDb = liftIO . dbFunction
+
+insertDate :: UTCTime -> Transaction -> Transaction
+insertDate date (Transaction title amount budgetId _ _) = (Transaction title amount budgetId (Just date) Nothing)
 
 routes :: ScottyM ()
 routes = do
@@ -43,8 +47,11 @@ routes = do
   post "/add-category" $ addBudget
   post "/add-transaction" $ addTransaction
 
-addTransaction =
-  jsonData >>= \x -> (inHandlerDb $ insert (x :: Transaction)) >>= json
+addTransaction = do
+  date <- liftIO $ getCurrentTime
+  transaction <- jsonData
+  record <- inHandlerDb $ insert $ insertDate date (transaction :: Transaction)
+  json record
 
 
 addBudget = do

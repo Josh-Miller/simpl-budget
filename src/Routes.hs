@@ -13,7 +13,9 @@ module Routes where
 import Web.Scotty
 import Data.Text
 import Database
+import CategoryTransactions
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as LLT
 import qualified Data.Text.Internal.Lazy as LT
 import qualified Database.Persist.Sql as SQ
 import Database.Persist.Class (insert)
@@ -46,6 +48,10 @@ routes = do
     getTransaction id
   post "/add-category" $ addBudget
   post "/add-transaction" $ addTransaction
+  post "/category-transactions/:catId" $ do
+    (catId :: Int) <- param "catId"
+    month <- liftIO $ getTransactionsInCat catId Month
+    json $ month
 
 addTransaction = do
   date <- liftIO $ getCurrentTime

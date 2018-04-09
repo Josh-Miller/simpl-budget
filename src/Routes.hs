@@ -26,7 +26,7 @@ import Control.Monad.Trans.Resource.Internal
 import Web.Scotty.Internal.Types
 import Data.Time.Clock (getCurrentTime, UTCTime)
 
-inHandlerDb :: Control.Monad.Trans.Reader.ReaderT
+inHandlerDb :: ReaderT
                          SQ.SqlBackend
                          (Control.Monad.Logger.NoLoggingT
                             (ResourceT IO))

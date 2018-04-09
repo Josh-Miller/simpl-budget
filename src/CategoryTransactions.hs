@@ -18,6 +18,14 @@ import           Control.Monad.IO.Class  (liftIO, MonadIO)
 import Data.Text
 import Data.Time.Clock
 
+dbFunction' :: ReaderT
+                         SQ.SqlBackend
+                         (Control.Monad.Logger.NoLoggingT
+                            (ResourceT IO))
+                         a
+                       -> IO a
+dbFunction' = liftIO . dbFunction
+
 data TimeRange =
     Month
   | Week
@@ -36,11 +44,11 @@ transactionsQuery catId month  = rawSql "select ?? from transaction where budget
 getTransactionsInCat cat Month = do
   month <- getCurrentMonth
   now <- getCurrentTime
-  category <- dbFunction $ SQ.get (SQ.toSqlKey $ (fromIntegral cat :: Int64))
-  return $ case category of
-    Just x -> dbFunction $ selectList [TransactionBudgetId ==. x] []
-    _ -> []
+  category <- dbFunction' $ SQ.get (SQ.toSqlKey $ read $ T.unpack cat)
+  return $ case (category :: Maybe Budget) of
+    Just x -> dbFunction' $ selectList [TransactionBudgetId ==. x] []
+    _ -> return []
   {-items <- dbFunction $ selectList [TransactionBudgetId ==. category] []-}
   {-return items-}
-getTransactionsInCat cat _ = return []
+{-getTransactionsInCat cat _ = return []-}
 

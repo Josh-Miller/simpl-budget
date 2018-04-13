@@ -49,9 +49,10 @@ routes = do
   post "/add-category" $ addBudget
   post "/add-transaction" $ addTransaction
   post "/category-transactions/:catId" $ do
-    (catId :: Int) <- param "catId"
+    (catId :: Text) <- param "catId"
     month <- liftIO $ getTransactionsInCat catId Month
-    json $ month
+    x <- inHandlerDb $ month
+    json $ (x :: [Maybe Transaction])
 
 addTransaction = do
   date <- liftIO $ getCurrentTime

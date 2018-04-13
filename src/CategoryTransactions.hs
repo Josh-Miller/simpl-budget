@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
 
 module CategoryTransactions where
 
@@ -40,14 +41,11 @@ getCurrentMonth = do
 transactionsQuery :: MonadIO m => Int64 -> Int64 -> ReaderT SqlBackend m [Entity Transaction]
 transactionsQuery catId month  = rawSql "select ?? from transaction where budget_id=? and extract(month from created) = ?" [PersistInt64 catId, PersistInt64 month]
 
-{-getTransactionsInCat :: Int -> TimeRange -> IO [Transaction]-}
+{-getTransactionsInCat :: Text -> TimeRange -> IO [Entity Transaction]-}
 getTransactionsInCat cat Month = do
   month <- getCurrentMonth
   now <- getCurrentTime
-  category <- dbFunction' $ SQ.get (SQ.toSqlKey $ read $ T.unpack cat)
-  return $ case (category :: Maybe Budget) of
-    Just x -> dbFunction' $ selectList [TransactionBudgetId ==. x] []
-    Nothing -> return []
+  return dbFunction' $ selectList [TransactionBudgetId ==. (SQ.toSqlKey $ read $ T.unpack cat)] []
   {-items <- dbFunction $ selectList [TransactionBudgetId ==. category] []-}
   {-return items-}
 {-getTransactionsInCat cat _ = return []-}

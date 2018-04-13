@@ -47,7 +47,7 @@ getTransactionsInCat cat Month = do
   category <- dbFunction' $ SQ.get (SQ.toSqlKey $ read $ T.unpack cat)
   return $ case (category :: Maybe Budget) of
     Just x -> dbFunction' $ selectList [TransactionBudgetId ==. x] []
-    _ -> return []
+    Nothing -> return []
   {-items <- dbFunction $ selectList [TransactionBudgetId ==. category] []-}
   {-return items-}
 {-getTransactionsInCat cat _ = return []-}

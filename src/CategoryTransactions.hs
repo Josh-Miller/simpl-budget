@@ -41,11 +41,13 @@ getCurrentMonth = do
 transactionsQuery :: MonadIO m => Int64 -> Int64 -> ReaderT SqlBackend m [Entity Transaction]
 transactionsQuery catId month  = rawSql "select ?? from transaction where budget_id=? and extract(month from created) = ?" [PersistInt64 catId, PersistInt64 month]
 
-{-getTransactionsInCat :: Text -> TimeRange -> IO [Entity Transaction]-}
-getTransactionsInCat cat Month = do
-  month <- getCurrentMonth
-  now <- getCurrentTime
-  return dbFunction' $ selectList [TransactionBudgetId ==. (SQ.toSqlKey $ read $ T.unpack cat)] []
+{-getTransactionsInCat ::-}
+  {-Text -> TimeRange -> IO [Entity Transaction]-}
+{-getTransactionsInCat cat Month = do-}
+  {-month <- getCurrentMonth-}
+  {-now <- getCurrentTime-}
+  {-return $ selectList [TransactionBudgetId ==. (SQ.toSqlKey $ read $ T.unpack cat)] []-}
+  --return dbFunction' $ selectList [TransactionBudgetId ==. (SQ.toSqlKey $ read $ T.unpack cat)] []
   {-items <- dbFunction $ selectList [TransactionBudgetId ==. category] []-}
   {-return items-}
 {-getTransactionsInCat cat _ = return []-}

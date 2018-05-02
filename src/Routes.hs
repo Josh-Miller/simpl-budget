@@ -50,8 +50,8 @@ routes = do
   post "/add-transaction" $ addTransaction
   post "/category-transactions/:catId" $ do
     (catId :: Text) <- param "catId"
-    {-x <- inHandlerDb $ getTransactionsInCat catId Month-}
-    x <- inHandlerDb $ SQ.selectList [] []
+    x <- liftIO $ getTransactionsInCat catId Month
+    {-x <- inHandlerDb $ liftIO $ SQ.selectList [] []-}
     json $ Prelude.map SQ.entityVal (x :: [SQ.Entity Transaction])
 
 addTransaction = do

@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeFamilies      #-}
 
 module CategoryTransactions where
 
@@ -12,6 +13,7 @@ import qualified Data.Text.Internal.Lazy as LT
 import qualified Database.Persist.Sql as SQ
 import Control.Monad.Trans.Reader
 import Control.Monad.Logger
+import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Resource.Internal
 import qualified Data.Text as T
 import Web.Scotty.Internal.Types
@@ -41,12 +43,12 @@ getCurrentMonth = do
 transactionsQuery :: MonadIO m => Int64 -> Int64 -> ReaderT SqlBackend m [Entity Transaction]
 transactionsQuery catId month  = rawSql "select ?? from transaction where budget_id=? and extract(month from created) = ?" [PersistInt64 catId, PersistInt64 month]
 
-{-getTransactionsInCat ::-}
-  {-Text -> TimeRange -> IO [Entity Transaction]-}
-{-getTransactionsInCat cat Month = do-}
-  {-month <- getCurrentMonth-}
-  {-now <- getCurrentTime-}
-  {-return $ selectList [TransactionBudgetId ==. (SQ.toSqlKey $ read $ T.unpack cat)] []-}
+getTransactionsInCat ::
+  Text -> TimeRange -> IO [Entity Transaction]
+getTransactionsInCat cat Month = do
+  month <- getCurrentMonth
+  now <- getCurrentTime
+  dbFunction' $ selectList [TransactionBudgetId ==. (SQ.toSqlKey $ read $ T.unpack cat)] []
   --return dbFunction' $ selectList [TransactionBudgetId ==. (SQ.toSqlKey $ read $ T.unpack cat)] []
   {-items <- dbFunction $ selectList [TransactionBudgetId ==. category] []-}
   {-return items-}

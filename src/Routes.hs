@@ -38,6 +38,9 @@ inHandlerDb = liftIO . dbFunction
 insertDate :: UTCTime -> Transaction -> Transaction
 insertDate date (Transaction title amount budgetId _ _) = (Transaction title amount budgetId (Just date) Nothing)
 
+getDate :: Transaction -> Maybe UTCTime
+getDate (Transaction _ _ _ date _) = date
+
 routes :: ScottyM ()
 routes = do
   post "/category/:category" $ do
@@ -57,6 +60,7 @@ routes = do
 addTransaction = do
   date <- liftIO $ getCurrentTime
   transaction <- jsonData
+  liftIO . putStrLn $ show $ getDate (transaction :: Transaction)
   record <- inHandlerDb $ insert $ insertDate date (transaction :: Transaction)
   json record
 

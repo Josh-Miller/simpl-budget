@@ -34,11 +34,10 @@ data TimeRange =
   | Week
   | Day deriving (Show, Eq, Ord)
 
-getCurrentMonth :: IO Int64
-getCurrentMonth = do
+date :: IO (Integer, Int, Int)
+date = do
   now <- getCurrentTime
-  let (_, month, _) = toGregorian $ utctDay now
-  return $ (fromIntegral month :: Int64)
+  return $ toGregorian $ utctDay now
 
 transactionsQuery :: MonadIO m => Int64 -> Int64 -> ReaderT SqlBackend m [Entity Transaction]
 transactionsQuery catId month  = rawSql "select ?? from transaction where budget_id=? and extract(month from created) = ?" [PersistInt64 catId, PersistInt64 month]
@@ -46,11 +45,12 @@ transactionsQuery catId month  = rawSql "select ?? from transaction where budget
 getTransactionsInCat ::
   Text -> TimeRange -> IO [Entity Transaction]
 getTransactionsInCat cat Month = do
-  month <- getCurrentMonth
   now <- getCurrentTime
-  dbFunction' $ selectList [TransactionBudgetId ==. (SQ.toSqlKey $ read $ T.unpack cat)] []
-  --return dbFunction' $ selectList [TransactionBudgetId ==. (SQ.toSqlKey $ read $ T.unpack cat)] []
-  {-items <- dbFunction $ selectList [TransactionBudgetId ==. category] []-}
-  {-return items-}
-{-getTransactionsInCat cat _ = return []-}
+  (year, month, _) <- date
+  putStrLn . show $ now
+  dbFunction' $ selectList
+    [ TransactionBudgetId ==. (SQ.toSqlKey $ read $ T.unpack cat)
+    , TransactionCreated <=. Just now
+    , TransactionCreated >=. Just (UTCTime (fromGregorian year month 1) 0)
+    ] []
 

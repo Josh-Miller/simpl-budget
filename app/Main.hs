@@ -8,5 +8,5 @@ import Database
 main :: IO ()
 main = do
   migrateDB
-  scotty 3000 $ do
+  scotty 3003 $ do
     routes

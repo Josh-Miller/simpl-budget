@@ -9,6 +9,7 @@ import Database.Persist.Sql
 import Data.Time.Clock (utctDay, getCurrentTime)
 import Data.Time.Calendar
 import Data.Int (Int64)
+import Data.TimeRange
 import qualified Data.Text.Internal.Lazy as LT
 import qualified Database.Persist.Sql as SQ
 import Control.Monad.Trans.Reader
@@ -29,17 +30,6 @@ dbFunction' :: ReaderT
                          a
                        -> IO a
 dbFunction' = liftIO . dbFunction
-
-data TimeRange =
-    Month
-  | Week
-  | Day deriving (Show, Eq, Ord)
-
-instance Parsable TimeRange where
-  parseParam "month" = Right Month
-  parseParam "week" = Right Week
-  parseParam "day" = Right Day
-  parseParam _ = Left "unable to parse TimeRange"
 
 date :: IO (Integer, Int, Int)
 date = do

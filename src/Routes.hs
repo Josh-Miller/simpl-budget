@@ -12,6 +12,7 @@ module Routes where
 
 import Web.Scotty
 import Data.Text
+import Data.TimeRange
 import Database
 import CategoryTransactions
 import qualified Data.Text as T

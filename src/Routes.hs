@@ -35,8 +35,9 @@ inHandlerDb :: ReaderT
                             LT.Text IO a
 inHandlerDb = liftIO . dbFunction
 
-insertDate :: UTCTime -> Transaction -> Transaction
-insertDate date (Transaction title amount budgetId _ _) = (Transaction title amount budgetId (Just date) Nothing)
+insertDate :: UTCTime -> Maybe UTCTime -> Transaction -> Transaction
+insertDate now Nothing (Transaction title amount budgetId _ _) = (Transaction title amount budgetId (Just now) Nothing)
+insertDate _ (Just _) y = y
 
 getDate :: Transaction -> Maybe UTCTime
 getDate (Transaction _ _ _ date _) = date
@@ -53,15 +54,16 @@ routes = do
   post "/add-transaction" $ addTransaction
   post "/category-transactions/:catId" $ do
     (catId :: Text) <- param "catId"
+    (timeRange :: TimeRange) <- param "timeRange"
+    liftIO $ putStrLn $ show timeRange
     x <- liftIO $ getTransactionsInCat catId Month
-    {-x <- inHandlerDb $ liftIO $ SQ.selectList [] []-}
     json $ Prelude.map SQ.entityVal (x :: [SQ.Entity Transaction])
 
 addTransaction = do
   date <- liftIO $ getCurrentTime
   transaction <- jsonData
   liftIO . putStrLn $ show $ getDate (transaction :: Transaction)
-  record <- inHandlerDb $ insert $ insertDate date (transaction :: Transaction)
+  record <- inHandlerDb $ insert $ insertDate date (getDate transaction) (transaction :: Transaction)
   json record
 
 

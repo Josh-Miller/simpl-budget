@@ -17,6 +17,7 @@ import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Resource.Internal
 import qualified Data.Text as T
 import Web.Scotty.Internal.Types
+import Web.Scotty (Parsable, parseParam)
 import           Control.Monad.IO.Class  (liftIO, MonadIO)
 import Data.Text
 import Data.Time.Clock
@@ -33,6 +34,12 @@ data TimeRange =
     Month
   | Week
   | Day deriving (Show, Eq, Ord)
+
+instance Parsable TimeRange where
+  parseParam "month" = Right Month
+  parseParam "week" = Right Week
+  parseParam "day" = Right Day
+  parseParam _ = Left "unable to parse TimeRange"
 
 date :: IO (Integer, Int, Int)
 date = do

@@ -37,7 +37,7 @@ inHandlerDb :: ReaderT
 inHandlerDb = liftIO . dbFunction
 
 insertDate :: UTCTime -> Maybe UTCTime -> Transaction -> Transaction
-insertDate now Nothing (Transaction title amount budgetId _ _) = (Transaction title amount budgetId (Just now) Nothing)
+insertDate now Nothing (Transaction title amount budgetId _ _) = Transaction title amount budgetId (Just now) Nothing
 insertDate _ (Just _) y = y
 
 getDate :: Transaction -> Maybe UTCTime
@@ -51,17 +51,17 @@ routes = do
   post "/transaction/:id" $ do
     id <- param "id"
     getTransaction id
-  post "/add-category" $ addBudget
-  post "/add-transaction" $ addTransaction
+  post "/add-category" addBudget
+  post "/add-transaction" addTransaction
   post "/category-transactions/:catId" $ do
     (catId :: Text) <- param "catId"
     (timeRange :: TimeRange) <- param "timeRange"
-    liftIO $ putStrLn $ show timeRange
-    x <- liftIO $ getTransactionsInCat catId Month
+    liftIO $ print $ show timeRange
+    x <- liftIO $ getTransactionsInCat catId timeRange
     json $ Prelude.map SQ.entityVal (x :: [SQ.Entity Transaction])
 
 addTransaction = do
-  date <- liftIO $ getCurrentTime
+  date <- liftIO getCurrentTime
   transaction <- jsonData
   liftIO . putStrLn $ show $ getDate (transaction :: Transaction)
   record <- inHandlerDb $ insert $ insertDate date (getDate transaction) (transaction :: Transaction)
@@ -77,9 +77,9 @@ addBudget = do
 getTransaction :: Text -> ActionM ()
 getTransaction id = do
   findTransaction <- inHandlerDb $ SQ.get $ SQ.toSqlKey $ read $ T.unpack id
-  json $ (findTransaction :: Maybe Transaction)
+  json (findTransaction :: Maybe Transaction)
 
 getCategory :: Text -> ActionM ()
 getCategory cat = do
   findPost <- inHandlerDb $ SQ.get (SQ.toSqlKey $ read $ T.unpack cat)
-  json $ (findPost :: Maybe Budget)
+  json (findPost :: Maybe Budget)

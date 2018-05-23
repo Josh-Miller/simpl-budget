@@ -1,0 +1,4 @@
+FROM fpco/stack-build:latest as build
+RUN mkdir -p /opt/build
+COPY . /opt/build
+RUN cd /opt/build && stack install --only-dependencies

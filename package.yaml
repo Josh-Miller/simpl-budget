@@ -32,6 +32,8 @@ dependencies:
 - resourcet
 - unliftio-core
 - time
+- generic-lens
+- lens
 
 library:
   source-dirs: src

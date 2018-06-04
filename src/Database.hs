@@ -29,7 +29,7 @@ connStr = "host=localhost dbname=budget user=budget password='' port=5432"
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 Budget
     name String
-    amount Double
+    total Double
     deriving Show Generic
 Transaction
     title String

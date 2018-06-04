@@ -1,0 +1,7 @@
+#!/bin/bash
+budget_image=budget-app
+docker build . -t $budget_image
+
+docker run -i -v ${PWD}/jm-builds:/artifacts $budget_image sh << COMMANDS
+cp /opt/budget/bin/budget-exe /artifacts/budget-linux
+COMMANDS

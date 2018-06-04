@@ -50,7 +50,7 @@ getTransactionsInCat cat timeRange = do
   now <- getCurrentTime
   (year, month, day) <- date
   print . show $ fromSundayStartWeek year day 0
-  print . show $ dayOfWeek $ fromGregorian year month day
+  -- print . show $ dayOfWeek $ fromGregorian year month day
   dbFunction' $ selectList
     [ TransactionBudgetId ==. SQ.toSqlKey (read $ T.unpack cat)
     , TransactionCreated <=. Just now

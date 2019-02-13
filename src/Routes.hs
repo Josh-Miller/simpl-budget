@@ -30,6 +30,11 @@ import Web.Scotty.Internal.Types
 import Data.Time.Clock (getCurrentTime, UTCTime)
 import Data.Generics.Product (field)
 import Control.Lens.Getter
+import Control.Applicative
+import Data.Time.Format (parseTimeOrError, defaultTimeLocale)
+
+instance Parsable UTCTime where
+  parseParam t = parseTimeOrError True defaultTimeLocale "%Y-%m-%d %H:%M:%S" (T.unpack $ LLT.toStrict t)
 
 inHandlerDb :: ReaderT
                          SQ.SqlBackend
@@ -49,6 +54,10 @@ getCreated = transactionCreated
 
 getTitle x = x ^. field @"transactionTitle"
 
+maybeParam :: Parsable a => LT.Text -> ActionM (Maybe a)
+maybeParam x = Just <$> param x <|> pure Nothing
+{-`rescue` \x -> return Nothing-}
+
 routes :: ScottyM ()
 routes = do
   post "/category/:category" $ do
@@ -62,6 +71,7 @@ routes = do
   post "/category-transactions/:catId" $ do
     (catId :: Text) <- param "catId"
     (timeRange :: TimeRange) <- param "timeRange" `rescue` \x -> return Month
+    (startDate :: Maybe UTCTime) <- maybeParam "createdDate"
     liftIO $ print $ show timeRange
     x <- liftIO $ getTransactionsInCat catId timeRange
     liftIO $ print $ Prelude.map (getTitle . SQ.entityVal) (x :: [SQ.Entity Transaction])

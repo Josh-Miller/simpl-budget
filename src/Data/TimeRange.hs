@@ -3,6 +3,9 @@
 module Data.TimeRange where
 
 import Web.Scotty (Parsable, parseParam)
+import Data.Time.Clock (UTCTime)
+import Data.Time.Format
+import Data.Text.Lazy (unpack)
 
 data TimeRange =
     Month
@@ -15,3 +18,8 @@ instance Parsable TimeRange where
   parseParam "day" = Right Day
   parseParam _ = Left "unable to parse TimeRange"
 
+
+{-data SomeTime = UTCTime-}
+
+{-instance Parsable SomeTime where-}
+  {-parseParam x = parseTimeOrError False defaultTimeLocale "Y-m-d" (unpack x)-}
